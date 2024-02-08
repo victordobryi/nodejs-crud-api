@@ -8,6 +8,7 @@ import { getPostBody } from '../utils/getPostBody';
 /* TODO:
   1) add error.message to sendErrorResponse function
   2) add body validation function
+  3) add NotFoundErrors to service
 */
 
 export class UserController {
@@ -18,7 +19,7 @@ export class UserController {
 
   async getAllUsers(req: IncomingMessage, res: ServerResponse) {
     try {
-      const users = this.userService.getAllUsers();
+      const users = await this.userService.getAllUsers();
       sendResponse(res, 200, { data: users });
     } catch (error) {
       sendErrorResponse(res, new NotFoundError(UserErrors.USERS_NOT_FOUND));
@@ -27,7 +28,7 @@ export class UserController {
 
   async getUserById(req: IncomingMessage, res: ServerResponse, userId: string) {
     try {
-      const user = this.userService.getUserById(userId);
+      const user = await this.userService.getUserById(userId);
       sendResponse(res, 200, { data: user });
     } catch (error) {
       sendErrorResponse(res, new NotFoundError(UserErrors.USER_NOT_FOUND));
@@ -36,9 +37,9 @@ export class UserController {
 
   async createUser(req: IncomingMessage, res: ServerResponse) {
     try {
-      const body: User = await getPostBody(req, res);
+      const body: User = (await getPostBody(req, res)) as User;
       const newUser = await this.userService.createUser(body);
-      sendResponse(res, 200, { data: newUser });
+      sendResponse(res, 201, { data: newUser });
     } catch (error) {
       sendErrorResponse(res, new InternalServerError());
     }
@@ -46,7 +47,7 @@ export class UserController {
 
   async updateUser(req: IncomingMessage, res: ServerResponse, userId: string) {
     try {
-      const body: User = await getPostBody(req, res);
+      const body: User = (await getPostBody(req, res)) as User;
       const updatedUser = await this.userService.updateUser(userId, body);
       sendResponse(res, 200, { data: updatedUser });
     } catch (error) {

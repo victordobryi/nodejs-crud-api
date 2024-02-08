@@ -4,17 +4,26 @@ import { InternalServerError } from './customErrors';
 
 export const getPostBody = async (req: IncomingMessage, res: ServerResponse) => {
   try {
-    let body = '';
+    return new Promise((resolve, reject) => {
+      let body = '';
 
-    req.on('data', (chunk) => {
-      body += chunk;
+      req.on('data', (chunk) => {
+        body += chunk;
+      });
+
+      req.on('end', () => {
+        try {
+          body = body ? JSON.parse(body) : {};
+          resolve(body);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      req.on('error', (error) => {
+        reject(error);
+      });
     });
-
-    req.on('end', () => {
-      body = body ? JSON.parse(body) : {};
-    });
-
-    return JSON.parse(body);
   } catch (error) {
     sendErrorResponse(res, new InternalServerError());
   }
