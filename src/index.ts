@@ -1,13 +1,19 @@
 import http from 'http';
 import 'dotenv/config';
+import { userRouter } from './user/user.router';
+import { appRouter } from './app.router';
+import { Routes } from './types/request.interface';
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
-const myServer = http.createServer((req, res) => {
-  res.write('Hello World!');
-  res.end();
+const server = http.createServer((req, res) => {
+  if (req.url?.startsWith(Routes.USERS)) {
+    userRouter(req, res);
+  } else {
+    appRouter(req, res);
+  }
 });
 
-myServer.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}. Go to http://localhost:${PORT}/`);
-});
+server.listen(PORT, () =>
+  console.log(`Server is running on port ${PORT}. Go to http://localhost:${PORT}/`)
+);
