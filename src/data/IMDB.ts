@@ -31,7 +31,7 @@ export class InMemoryDB {
   }
 
   getAll(): { [key: string]: any } {
-    return this.store;
+    return Object.values(this.store);
   }
 
   clear(): void {

@@ -14,7 +14,7 @@ export class AppController {
   getHealthStatus(res: ServerResponse) {
     try {
       const data = this.appService.getHealthStatus();
-      sendResponse(res, 200, { data });
+      sendResponse(res, 200, data);
     } catch (error) {
       sendErrorResponse(res, new InternalServerError(getErrorMessage(error)));
     }
@@ -23,7 +23,7 @@ export class AppController {
   helloWorld(res: ServerResponse) {
     try {
       const data = this.appService.helloWorld();
-      sendResponse(res, 200, { data });
+      sendResponse(res, 200, data);
     } catch (error) {
       sendErrorResponse(res, new InternalServerError(getErrorMessage(error)));
     }

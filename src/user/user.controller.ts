@@ -6,7 +6,7 @@ import { User, UserErrors } from './user.interface';
 import { getPostBody } from '../utils/getPostBody';
 import { getErrorMessage } from '../utils/getErrorMessage';
 import { isValidId } from '../utils/isValidId';
-import { validateDto } from '../utils/isValidUserBody';
+import { isValidBody, validateDto } from '../utils/isValidUserBody';
 import { UserDto } from './user.dto';
 
 export class UserController {
@@ -25,7 +25,7 @@ export class UserController {
   async getAllUsers(res: ServerResponse) {
     try {
       const users = await this.userService.getAllUsers();
-      sendResponse(res, 200, { data: users });
+      sendResponse(res, 200, users);
     } catch (error) {
       sendErrorResponse(res, new InternalServerError(getErrorMessage(error)));
     }
@@ -36,7 +36,7 @@ export class UserController {
       if (!isValidId(userId)) throw new BadRequestError(UserErrors.NOT_VALID_ID);
       const user = await this.getUserOrThrowError(userId);
       if (!user) throw new NotFoundError(UserErrors.USER_NOT_FOUND);
-      sendResponse(res, 200, { data: user });
+      sendResponse(res, 200, user);
     } catch (error) {
       sendErrorResponse(res, error);
     }
@@ -48,7 +48,7 @@ export class UserController {
       if (!validateDto(UserDto, body)) throw new BadRequestError(UserErrors.NOT_VALID_BODY);
 
       const newUser = await this.userService.createUser(body);
-      sendResponse(res, 201, { data: newUser });
+      sendResponse(res, 201, newUser);
     } catch (error) {
       sendErrorResponse(res, error);
     }
@@ -57,10 +57,11 @@ export class UserController {
   async updateUser(req: IncomingMessage, res: ServerResponse, userId: string) {
     try {
       const body = (await getPostBody(req, res)) as User;
+      if (!isValidBody(UserDto, body)) throw new BadRequestError(UserErrors.NOT_VALID_BODY);
       const user = await this.getUserOrThrowError(userId);
       const updatedUser = await this.userService.updateUser(user, body);
       if (!updatedUser) throw new NotFoundError(UserErrors.USER_NOT_FOUND);
-      sendResponse(res, 200, { data: updatedUser });
+      sendResponse(res, 200, updatedUser);
     } catch (error) {
       sendErrorResponse(res, error);
     }
@@ -70,7 +71,7 @@ export class UserController {
     try {
       await this.getUserOrThrowError(userId);
       await this.userService.deleteUser(userId);
-      sendResponse(res, 204, { data: null });
+      sendResponse(res, 204, null);
     } catch (error) {
       sendErrorResponse(res, error);
     }
