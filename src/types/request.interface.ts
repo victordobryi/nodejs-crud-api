@@ -8,5 +8,5 @@ export enum Methods {
 export enum Routes {
   HEALTH = '/health',
   BASIC = '/',
-  USERS = '/api/users',
+  USERS = '/users',
 }

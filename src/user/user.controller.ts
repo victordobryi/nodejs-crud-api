@@ -9,14 +9,17 @@ import { isValidId } from '../utils/isValidId';
 import { validateDto } from '../utils/isValidUserBody';
 import { UserDto } from './user.dto';
 
-/* TODO:
-  1) remove code duplicate
-*/
-
 export class UserController {
   private readonly userService: UserService;
   constructor() {
     this.userService = new UserService();
+  }
+
+  private async getUserOrThrowError(userId: string): Promise<User> {
+    if (!isValidId(userId)) throw new BadRequestError(UserErrors.NOT_VALID_ID);
+    const user = await this.userService.getUserById(userId);
+    if (!user) throw new NotFoundError(UserErrors.USER_NOT_FOUND);
+    return user;
   }
 
   async getAllUsers(res: ServerResponse) {
@@ -31,7 +34,7 @@ export class UserController {
   async getUserById(res: ServerResponse, userId: string) {
     try {
       if (!isValidId(userId)) throw new BadRequestError(UserErrors.NOT_VALID_ID);
-      const user = await this.userService.getUserById(userId);
+      const user = await this.getUserOrThrowError(userId);
       if (!user) throw new NotFoundError(UserErrors.USER_NOT_FOUND);
       sendResponse(res, 200, { data: user });
     } catch (error) {
@@ -53,10 +56,8 @@ export class UserController {
 
   async updateUser(req: IncomingMessage, res: ServerResponse, userId: string) {
     try {
-      if (!isValidId(userId)) throw new BadRequestError(UserErrors.NOT_VALID_ID);
       const body = (await getPostBody(req, res)) as User;
-      const user = await this.userService.getUserById(userId);
-      if (!user) throw new NotFoundError(UserErrors.USER_NOT_FOUND);
+      const user = await this.getUserOrThrowError(userId);
       const updatedUser = await this.userService.updateUser(user, body);
       if (!updatedUser) throw new NotFoundError(UserErrors.USER_NOT_FOUND);
       sendResponse(res, 200, { data: updatedUser });
@@ -67,9 +68,7 @@ export class UserController {
 
   async deleteUser(res: ServerResponse, userId: string) {
     try {
-      if (!isValidId(userId)) throw new BadRequestError(UserErrors.NOT_VALID_ID);
-      const user = await this.userService.getUserById(userId);
-      if (!user) throw new NotFoundError(UserErrors.USER_NOT_FOUND);
+      await this.getUserOrThrowError(userId);
       await this.userService.deleteUser(userId);
       sendResponse(res, 204, { data: null });
     } catch (error) {

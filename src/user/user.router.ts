@@ -9,11 +9,7 @@ const userController = new UserController();
 export const userRouter = (req: IncomingMessage, res: ServerResponse) => {
   const { url, method } = req;
 
-  if (!url || !method) {
-    return sendErrorResponse(res, new BadRequestError());
-  }
-
-  const parts = url.split('/');
+  const parts = url!.split('/');
   const userId = parts[3];
 
   switch (method) {
