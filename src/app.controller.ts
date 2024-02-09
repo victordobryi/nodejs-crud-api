@@ -1,11 +1,8 @@
-import { IncomingMessage, ServerResponse } from 'http';
+import { ServerResponse } from 'http';
 import { AppService } from './app.service';
 import { sendErrorResponse, sendResponse } from './utils/sendResponse';
 import { InternalServerError } from './utils/customErrors';
-
-/* TODO:
-  1) remove code duplicate (create function, that handle error)
-*/
+import { getErrorMessage } from './utils/getErrorMessage';
 
 export class AppController {
   private readonly appService: AppService;
@@ -14,29 +11,21 @@ export class AppController {
     this.appService = new AppService();
   }
 
-  getHealthStatus(req: IncomingMessage, res: ServerResponse) {
+  getHealthStatus(res: ServerResponse) {
     try {
-      const message = this.appService.getHealthStatus();
-      sendResponse(res, 200, { message });
+      const data = this.appService.getHealthStatus();
+      sendResponse(res, 200, { data });
     } catch (error) {
-      if (error instanceof Error) {
-        sendErrorResponse(res, new InternalServerError(error.message));
-      } else {
-        sendErrorResponse(res, new InternalServerError());
-      }
+      sendErrorResponse(res, new InternalServerError(getErrorMessage(error)));
     }
   }
 
-  helloWorld(req: IncomingMessage, res: ServerResponse) {
+  helloWorld(res: ServerResponse) {
     try {
-      const message = this.appService.helloWorld();
-      sendResponse(res, 200, { message });
+      const data = this.appService.helloWorld();
+      sendResponse(res, 200, { data });
     } catch (error) {
-      if (error instanceof Error) {
-        sendErrorResponse(res, new InternalServerError(error.message));
-      } else {
-        sendErrorResponse(res, new InternalServerError());
-      }
+      sendErrorResponse(res, new InternalServerError(getErrorMessage(error)));
     }
   }
 }

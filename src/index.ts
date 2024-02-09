@@ -13,9 +13,12 @@ import { Routes } from './types/request.interface';
     d) We try to update the created record with a PUT api/users/{userId}request (a response is expected containing an updated object with the same id)
     e) With a DELETE api/users/{userId} request, we delete the created object by id (confirmation of successful deletion is expected)
     f) With a GET api/users/{userId} request, we are trying to get a deleted object by id (expected answer is that there is no such object)
-  3) Requests to non-existing endpoints (e.g. some-non/existing/resource) should be handled (server should answer with status code 404 and corresponding human-friendly message)
-  4) Errors on the server side that occur during the processing of a request should be handled and processed correctly (server should answer with status code 500 and corresponding human-friendly message)
-    */
+*/
+
+/* 
+  ERRORS:
+    a) /api/usersa - Should not to be Valid
+*/
 
 const PORT = process.env.PORT || 5000;
 

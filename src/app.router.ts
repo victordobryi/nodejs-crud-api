@@ -14,10 +14,13 @@ export const appRouter = (req: IncomingMessage, res: ServerResponse) => {
   }
 
   if (url === Routes.BASIC && method === Methods.GET) {
-    return appController.helloWorld(req, res);
+    return appController.helloWorld(res);
   } else if (url === Routes.HEALTH && method === Methods.GET) {
-    return appController.getHealthStatus(req, res);
+    return appController.getHealthStatus(res);
   } else {
-    return sendErrorResponse(res, new NotFoundError('Route not found'));
+    return sendErrorResponse(
+      res,
+      new NotFoundError('Sorry, the page you are looking for does not exist.')
+    );
   }
 };
