@@ -1,13 +1,9 @@
 import request from 'supertest';
 import { server } from '../index';
-import { User } from '../user/user.interface';
+import { User, UserErrors } from '../user/user.interface';
+import { userData } from '../constants/testTypes';
 
 describe('1st scenario', () => {
-  const userData = {
-    username: 'Viktar',
-    age: 26,
-    hobbies: ['football', 'reading'],
-  };
   let createdUser: User;
   afterAll(() => server.close());
   test('should return a list of users with a GET api/users', async () => {
@@ -44,7 +40,7 @@ describe('1st scenario', () => {
   test('should return null if get a user after delete it with a GET api/users/{userId}', async () => {
     const userReq = await request(server).get(`/api/users/${createdUser.id}`);
     expect(userReq.status).toEqual(404);
-    expect(userReq.body.message).toEqual('Not Found : User not found');
+    expect(userReq.body.message).toEqual(`Not Found : ${UserErrors.USER_NOT_FOUND}`);
   });
 });
 
@@ -59,24 +55,24 @@ describe('2nd scenario', () => {
   test('should return invalid message if not valid userId', async () => {
     const req = await request(server).get('/api/users/1');
     expect(req.status).toBe(400);
-    expect(req.body.message).toEqual('Bad Request : Not valid user id');
+    expect(req.body.message).toEqual(`Bad Request : ${UserErrors.NOT_VALID_ID}`);
   });
   test('should return not found message if non-existent uuid', async () => {
     const req = await request(server).get('/api/users/3d2dc3c2-8c78-4fea-85f0-24f064327a92');
     expect(req.status).toBe(404);
-    expect(req.body.message).toEqual('Not Found : User not found');
+    expect(req.body.message).toEqual(`Not Found : ${UserErrors.USER_NOT_FOUND}`);
   });
   test('should return error if not valid data to create user', async () => {
     const req = await request(server).post('/api/users').send({
       param: 'not valid data',
     });
     expect(req.status).toBe(400);
-    expect(req.body.message).toEqual('Bad Request : Invalid user data');
+    expect(req.body.message).toEqual(`Bad Request : ${UserErrors.NOT_VALID_BODY}`);
   });
   test('should return error if no id to delete a user', async () => {
     const req = await request(server).delete(`/api/users/`);
     expect(req.status).toBe(400);
-    expect(req.body.message).toEqual('Bad Request : Not valid user id');
+    expect(req.body.message).toEqual(`Bad Request : ${UserErrors.NOT_VALID_ID}`);
   });
   test('should return hello world message', async () => {
     const req = await request(server).get('');
@@ -86,11 +82,6 @@ describe('2nd scenario', () => {
 });
 
 describe('3rd scenario', () => {
-  const userData = {
-    username: 'Viktar',
-    age: 26,
-    hobbies: ['football', 'reading'],
-  };
   let createdUser: User;
   afterAll(() => server.close());
 
@@ -102,13 +93,13 @@ describe('3rd scenario', () => {
       .put(`/api/users/${createdUser.id}`)
       .send({ username: 1 });
     expect(updateReq.status).toBe(400);
-    expect(updateReq.body.message).toEqual('Bad Request : Invalid user data');
+    expect(updateReq.body.message).toEqual(`Bad Request : ${UserErrors.NOT_VALID_BODY}`);
   });
 
   test('should return an error if the age type is incorrect', async () => {
     const updateReq = await request(server).put(`/api/users/${createdUser.id}`).send({ age: '1' });
     expect(updateReq.status).toBe(400);
-    expect(updateReq.body.message).toEqual('Bad Request : Invalid user data');
+    expect(updateReq.body.message).toEqual(`Bad Request : ${UserErrors.NOT_VALID_BODY}`);
   });
 
   test('should return an error if the hobbies type is incorrect', async () => {
@@ -116,7 +107,7 @@ describe('3rd scenario', () => {
       .put(`/api/users/${createdUser.id}`)
       .send({ hobbies: '1' });
     expect(updateReq.status).toBe(400);
-    expect(updateReq.body.message).toEqual('Bad Request : Invalid user data');
+    expect(updateReq.body.message).toEqual(`Bad Request : ${UserErrors.NOT_VALID_BODY}`);
   });
 
   test('should not change the user if the data is empty', async () => {
