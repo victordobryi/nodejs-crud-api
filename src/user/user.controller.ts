@@ -6,7 +6,7 @@ import { User, UserErrors } from './user.interface';
 import { getPostBody } from '../utils/getPostBody';
 import { getErrorMessage } from '../utils/getErrorMessage';
 import { isValidId } from '../utils/isValidId';
-import { isValidBody, validateDto } from '../utils/isValidUserBody';
+import { validateDto } from '../utils/isValidUserBody';
 import { UserDto } from './user.dto';
 
 export class UserController {
@@ -57,7 +57,7 @@ export class UserController {
   async updateUser(req: IncomingMessage, res: ServerResponse, userId: string) {
     try {
       const body = (await getPostBody(req, res)) as User;
-      if (!isValidBody(UserDto, body)) throw new BadRequestError(UserErrors.NOT_VALID_BODY);
+      if (!validateDto(UserDto, body, false)) throw new BadRequestError(UserErrors.NOT_VALID_BODY);
       const user = await this.getUserOrThrowError(userId);
       const updatedUser = await this.userService.updateUser(user, body);
       if (!updatedUser) throw new NotFoundError(UserErrors.USER_NOT_FOUND);
