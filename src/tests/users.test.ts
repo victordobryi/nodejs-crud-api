@@ -1,7 +1,9 @@
 import request from 'supertest';
-import { server } from '../index';
 import { User, UserErrors } from '../user/user.interface';
 import { userData } from '../constants/testTypes';
+import { createServer } from '../server';
+
+const server = createServer();
 
 describe('1st scenario', () => {
   let createdUser: User;

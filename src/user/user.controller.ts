@@ -1,18 +1,22 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { UserService } from './user.service';
 import { sendErrorResponse, sendResponse } from '../utils/sendResponse';
-import { BadRequestError, InternalServerError, NotFoundError } from '../utils/customErrors';
+import { BadRequestError, NotFoundError } from '../utils/customErrors';
 import { User, UserErrors } from './user.interface';
 import { getPostBody } from '../utils/getPostBody';
-import { getErrorMessage } from '../utils/getErrorMessage';
 import { isValidId } from '../utils/isValidId';
 import { validateDto } from '../utils/isValidUserBody';
 import { UserDto } from './user.dto';
+import cluster from 'cluster';
+import { MasterInMemoryDB } from '../data/masterIMDB';
+import { InMemoryDB } from '../data/IMDB';
+import { v4 as uuidv4 } from 'uuid';
 
 export class UserController {
   private readonly userService: UserService;
   constructor() {
-    this.userService = new UserService();
+    const db = cluster.isWorker ? new MasterInMemoryDB() : new InMemoryDB();
+    this.userService = new UserService(db);
   }
 
   private async getUserOrThrowError(userId: string): Promise<User> {
@@ -27,7 +31,7 @@ export class UserController {
       const users = await this.userService.getAllUsers();
       sendResponse(res, 200, users);
     } catch (error) {
-      sendErrorResponse(res, new InternalServerError(getErrorMessage(error)));
+      sendErrorResponse(res, error);
     }
   }
 
@@ -35,7 +39,6 @@ export class UserController {
     try {
       if (!isValidId(userId)) throw new BadRequestError(UserErrors.NOT_VALID_ID);
       const user = await this.getUserOrThrowError(userId);
-      if (!user) throw new NotFoundError(UserErrors.USER_NOT_FOUND);
       sendResponse(res, 200, user);
     } catch (error) {
       sendErrorResponse(res, error);
@@ -46,8 +49,8 @@ export class UserController {
     try {
       const body: User = (await getPostBody(req, res)) as User;
       if (!validateDto(UserDto, body)) throw new BadRequestError(UserErrors.NOT_VALID_BODY);
-
-      const newUser = await this.userService.createUser(body);
+      const newUser = { ...body, id: uuidv4() };
+      await this.userService.createUser(newUser);
       sendResponse(res, 201, newUser);
     } catch (error) {
       sendErrorResponse(res, error);
@@ -58,6 +61,7 @@ export class UserController {
     try {
       const body = (await getPostBody(req, res)) as User;
       if (!validateDto(UserDto, body, false)) throw new BadRequestError(UserErrors.NOT_VALID_BODY);
+
       const user = await this.getUserOrThrowError(userId);
       const updatedUser = await this.userService.updateUser(user, body);
       if (!updatedUser) throw new NotFoundError(UserErrors.USER_NOT_FOUND);

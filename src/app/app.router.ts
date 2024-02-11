@@ -1,8 +1,8 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { AppController } from './app.controller';
-import { sendErrorResponse } from './utils/sendResponse';
-import { BadRequestError, NotFoundError } from './utils/customErrors';
-import { Methods, Routes } from './types/request.interface';
+import { sendErrorResponse } from '../utils/sendResponse';
+import { BadRequestError, NotFoundError } from '../utils/customErrors';
+import { Methods, Routes } from '../types/request.interface';
 
 const appController = new AppController();
 

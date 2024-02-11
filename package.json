@@ -6,6 +6,7 @@
   "scripts": {
     "start:dev": "nodemon  ./src/index.ts",
     "start:prod": "ts-node  ./src/index.ts",
+    "start:multi": "nodemon  ./src/loadBalancer.ts --multi",
     "test": "jest --silent",
     "test-coverage": "jest --coverage",
     "test:verbose": "jest"

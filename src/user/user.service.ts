@@ -1,13 +1,12 @@
 import { User } from './user.interface';
-import { IUserDto } from './user.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { InMemoryDB } from '../data/IMDB';
 import { getErrorMessage } from '../utils/getErrorMessage';
+import { MasterInMemoryDB } from '../data/masterIMDB';
 
 export class UserService {
-  private db: InMemoryDB;
-  constructor() {
-    this.db = new InMemoryDB();
+  private db: InMemoryDB | MasterInMemoryDB;
+  constructor(db: InMemoryDB | MasterInMemoryDB) {
+    this.db = db;
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -26,11 +25,10 @@ export class UserService {
     }
   }
 
-  async createUser(user: IUserDto): Promise<User> {
+  async createUser(user: User): Promise<User> {
     try {
-      const newUser = { ...user, id: uuidv4() };
-      this.db.save(newUser.id, newUser);
-      return newUser;
+      this.db.save(user);
+      return user;
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
@@ -39,9 +37,7 @@ export class UserService {
   async updateUser(existingUser: User, updatedUser: Partial<User>): Promise<User> {
     try {
       const updatedUserData = { ...existingUser, ...updatedUser };
-
-      this.db.save(existingUser.id, updatedUserData);
-
+      this.db.save(updatedUserData);
       return updatedUserData;
     } catch (error) {
       throw new Error(getErrorMessage(error));

@@ -1,8 +1,8 @@
 import { ServerResponse } from 'http';
 import { AppService } from './app.service';
-import { sendErrorResponse, sendResponse } from './utils/sendResponse';
-import { InternalServerError } from './utils/customErrors';
-import { getErrorMessage } from './utils/getErrorMessage';
+import { sendErrorResponse, sendResponse } from '../utils/sendResponse';
+import { InternalServerError } from '../utils/customErrors';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 export class AppController {
   private readonly appService: AppService;
